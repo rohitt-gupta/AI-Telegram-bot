@@ -17,6 +17,7 @@ try {
 }
 
 bot.start(async (ctx) => {
+	console.log("Bot starting up at:", new Date().toISOString());
 	const from = ctx.update.message.from;
 	try {
 		await userModel.findOneAndUpdate(
@@ -136,11 +137,18 @@ bot.on("text", async (ctx) => {
 	}
 });
 
-bot.launch();
+const shutdown = async () => {
+	console.log("Shutting down bot...");
+	await bot.stop("SIGTERM received");
+	process.exit(0);
+};
 
-// Enable gracefull shutdown
-process.once("SIGINT", () => bot.stop("SIGINT"));
-process.once("SIGTERM", () => bot.stop("SIGTERM"));
+bot.launch().then(() => {
+	console.log("Bot started successfully");
+});
+
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);
 
 // const chat = model.startChat({
 // 	history: [
